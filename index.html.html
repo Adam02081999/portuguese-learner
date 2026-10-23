@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aprenda Português - Brazilian Portuguese Audio Player (101-200)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter & Outfit Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brazil: {
+              green: '#009b3a',
+              darkgreen: '#007a2d',
+              teal: '#008080',
+              yellow: '#fedf00',
+              amber: '#d97706',
+              blue: '#002776',
+              softbg: '#f4f9f5'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar and active sentence highlight styles */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #009b3a;
+      border-radius: 4px;
+    }
+    .playing-card {
+      border-left: 6px solid #009b3a !important;
+      background-color: #f0fdf4 !important;
+      box-shadow: 0 4px 12px rgba(0, 155, 58, 0.12);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans pb-32 min-h-screen">
+
+  <!-- TOP HEADER -->
+  <header class="bg-gradient-to-r from-emerald-800 via-brazil-green to-teal-700 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 bg-brazil-yellow text-brazil-blue rounded-xl flex items-center justify-center font-black text-xl shadow-md border-2 border-white/30">
+          🇧🇷
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-xl sm:text-2xl tracking-tight leading-none text-white">
+            Português do Brasil
+          </h1>
+          <p class="text-xs sm:text-sm text-emerald-100 mt-1 font-medium">
+            Hyperpolyglot Sentences 101–200 • Audio Learning Player
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Stats & TTS Warning badge -->
+      <div class="flex items-center gap-2 text-xs">
+        <span id="voiceStatusBadge" class="bg-emerald-900/60 text-emerald-200 border border-emerald-400/30 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+          <i class="fa-solid fa-spinner fa-spin"></i> Initializing Speech...
+        </span>
+        <button id="favOnlyToggle" onclick="toggleFavoritesFilter()" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-full transition flex items-center gap-1.5">
+          <i class="fa-regular fa-star text-brazil-yellow"></i>
+          <span>Favorites (<span id="favCount">0</span>)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
+
+    <!-- CONTROLS & FILTERS SECTION -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 mb-6">
+      <div class="flex flex-col lg:flex-row gap-4 justify-between lg:items-center">
+        
+        <!-- Search Bar -->
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="searchInput" placeholder="Search Portuguese, English, or word breakdown..."
+                 class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brazil-green focus:bg-white transition"
+                 oninput="handleSearch()">
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Mode Selectors -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          
+          <!-- Audio Sequence Mode -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-0.5">Playback Mode</label>
+            <select id="playModeSelect" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-brazil-green outline-none">
+              <option value="PT_ONLY">Portuguese Only</option>
+              <option value="PT_EN" selected>Portuguese ➔ English</option>
+              <option value="EN_PT">English ➔ Portuguese</option>
+              <option value="EN_ONLY">English Only</option>
+            </select>
+          </div>
+
+          <!-- Speed Selector -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-0.5">Speed Rate</label>
+            <select id="speedRateSelect" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm rounded-xl px-3 py-2 font-medium focus:ring-2 focus:ring-brazil-green outline-none">
+              <option value="0.5">0.5x (Very Slow)</option>
+              <option value="0.7" selected>0.7x (Slow)</option>
+              <option value="1.0">1.0x (Normal)</option>
+              <option value="1.2">1.2x (Fast)</option>
+            </select>
+          </div>
+
+          <!-- Auto Play / Loop Toggle -->
+          <div class="flex items-center gap-1.5 mt-4 sm:mt-auto">
+            <button id="autoNextBtn" onclick="toggleAutoNext()" title="Toggle Auto Next"
+                    class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-600 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-forward-step text-slate-400"></i>
+              <span>Auto-Next</span>
+            </button>
+            <button id="loopSingleBtn" onclick="toggleLoopSingle()" title="Toggle Repeat Current"
+                    class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-600 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-rotate-right text-slate-400"></i>
+              <span>Loop 1</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Categories Filter Tabs -->
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="categoryTabs">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST HEADER & ACTION SUMMARY -->
+    <div class="flex items-center justify-between mb-4 px-1">
+      <div class="text-sm font-medium text-slate-500">
+        Showing <span id="visibleCount" class="font-bold text-slate-800">0</span> sentences
+      </div>
+      <button onclick="playAllFiltered()" class="text-xs sm:text-sm font-semibold text-brazil-green hover:text-brazil-darkgreen flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 transition">
+        <i class="fa-solid fa-play"></i> Play All Filtered
+      </button>
+    </div>
+
+    <!-- SENTENCES LIST CONTAINER -->
+    <div id="sentencesList" class="space-y-3">
+      <!-- Cards rendered here by Javascript -->
+    </div>
+
+  </main>
+
+  <!-- BOTTOM FIXED AUDIO PLAYER BAR -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-40 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      
+      <!-- Current Sentence Info -->
+      <div class="flex items-center gap-3 w-full sm:w-1/3 min-w-0">
+        <div id="playerNumBadge" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm shrink-0 border border-slate-200">
+          #
+        </div>
+        <div class="min-w-0 flex-1">
+          <p id="playerPT" class="text-sm font-bold text-slate-900 truncate">Select a sentence to start</p>
+          <p id="playerEN" class="text-xs text-slate-500 truncate">Clique no botão de reprodução</p>
+        </div>
+      </div>
+
+      <!-- Player Controls Buttons -->
+      <div class="flex items-center justify-center gap-3 w-full sm:w-1/3">
+        <button onclick="playPrevSentence()" class="p-2 text-slate-600 hover:text-brazil-green transition rounded-lg hover:bg-slate-100 text-lg">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+        <button id="mainPlayBtn" onclick="toggleMainPlay()" class="w-12 h-12 bg-brazil-green hover:bg-brazil-darkgreen text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95">
+          <i class="fa-solid fa-play ml-0.5"></i>
+        </button>
+        <button onclick="playNextSentence()" class="p-2 text-slate-600 hover:text-brazil-green transition rounded-lg hover:bg-slate-100 text-lg">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+
+      <!-- Secondary Controls & Status -->
+      <div class="flex items-center justify-end gap-3 w-full sm:w-1/3 text-xs text-slate-500">
+        <span id="speechStateLabel" class="hidden sm:inline-block font-medium bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+          Ready
+        </span>
+        <button onclick="stopSpeech()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-medium transition">
+          <i class="fa-solid fa-stop mr-1"></i> Stop
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // --- 1. FULL SENTENCE DATASET (101 - 200) ---
+    const SENTENCES_DATA = [
+      // Daily Routine & Home
+      {
+        id: 101, category: "Daily Routine & Home",
+        pt: "Eu acordo às sete.",
+        en: "I wake up at seven.",
+        breakdown: [ {pt:"Eu", en:"I"}, {pt:"acordo", en:"wake up"}, {pt:"às", en:"at"}, {pt:"sete", en:"seven"} ]
+      },
+      {
+        id: 102, category: "Daily Routine & Home",
+        pt: "Vou tomar banho.",
+        en: "I'm going to take a shower.",
+        breakdown: [ {pt:"Vou", en:"am going to"}, {pt:"tomar banho", en:"take a shower"} ]
+      },
+      {
+        id: 103, category: "Daily Routine & Home",
+        pt: "Estou com fome.",
+        en: "I'm hungry.",
+        breakdown: [ {pt:"Estou com", en:"am with"}, {pt:"fome", en:"hunger"} ],
+        note: "Pattern: Estou com + noun (fome = hungry, sede = thirsty, frio = cold, calor = hot, pressa = in a hurry)."
+      },
+      {
+        id: 104, category: "Daily Routine & Home",
+        pt: "Estou com sono.",
+        en: "I'm sleepy.",
+        breakdown: [ {pt:"Estou com", en:"am with"}, {pt:"sono", en:"sleepiness"} ]
+      },
+      {
+        id: 105, category: "Daily Routine & Home",
+        pt: "Vou dormir cedo hoje.",
+        en: "I'm going to bed early tonight.",
+        breakdown: [ {pt:"Vou", en:"am going to"}, {pt:"dormir", en:"sleep"}, {pt:"cedo", en:"early"}, {pt:"hoje", en:"today"} ]
+      },
+      {
+        id: 106, category: "Daily Routine & Home",
+        pt: "O que você vai fazer hoje?",
+        en: "What are you going to do today?",
+        breakdown: [ {pt:"O que", en:"what"}, {pt:"você", en:"you"}, {pt:"vai", en:"are going to"}, {pt:"fazer", en:"do"}, {pt:"hoje", en:"today"} ],
+        note: "Pattern: ir + verb = going to (future). The most common way to talk about plans."
+      },
+      {
+        id: 107, category: "Daily Routine & Home",
+        pt: "Hoje eu vou trabalhar em casa.",
+        en: "Today I'm working from home.",
+        breakdown: [ {pt:"Hoje", en:"today"}, {pt:"eu", en:"I"}, {pt:"vou", en:"am going to"}, {pt:"trabalhar", en:"work"}, {pt:"em casa", en:"at home"} ]
+      },
+      {
+        id: 108, category: "Daily Routine & Home",
+        pt: "Preciso ir ao mercado.",
+        en: "I need to go to the supermarket.",
+        breakdown: [ {pt:"Preciso", en:"need"}, {pt:"ir", en:"to go"}, {pt:"ao", en:"to the"}, {pt:"mercado", en:"supermarket"} ],
+        note: "Brazilians usually say mercado, not supermercado."
+      },
+      {
+        id: 109, category: "Daily Routine & Home",
+        pt: "Acabei de chegar em casa.",
+        en: "I just got home.",
+        breakdown: [ {pt:"Acabei de", en:"just (lit. finished)"}, {pt:"chegar", en:"arrive"}, {pt:"em casa", en:"at home"} ],
+        note: "Pattern: Acabei de + verb = I just (did something)."
+      },
+      {
+        id: 110, category: "Daily Routine & Home",
+        pt: "Estou ocupado agora.",
+        en: "I'm busy right now.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"ocupado", en:"busy"}, {pt:"agora", en:"now"} ],
+        note: "Women say: ocupada."
+      },
+      {
+        id: 111, category: "Daily Routine & Home",
+        pt: "Você pode me ligar mais tarde?",
+        en: "Can you call me later?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"pode", en:"can"}, {pt:"me", en:"me"}, {pt:"ligar", en:"call"}, {pt:"mais tarde", en:"later"} ]
+      },
+      {
+        id: 112, category: "Daily Routine & Home",
+        pt: "Vou dar uma volta.",
+        en: "I'm going for a walk.",
+        breakdown: [ {pt:"Vou", en:"am going to"}, {pt:"dar uma volta", en:"take a stroll (lit. give a turn)"} ]
+      },
+
+      // Opinions & Feelings
+      {
+        id: 113, category: "Opinions & Feelings",
+        pt: "Eu acho que sim.",
+        en: "I think so.",
+        breakdown: [ {pt:"Eu acho", en:"I think"}, {pt:"que sim", en:"that yes"} ],
+        note: "\"Acho que não\" = I don't think so."
+      },
+      {
+        id: 114, category: "Opinions & Feelings",
+        pt: "Na minha opinião, vale a pena.",
+        en: "In my opinion, it's worth it.",
+        breakdown: [ {pt:"Na minha opinião", en:"in my opinion"}, {pt:"vale a pena", en:"it's worth it (lit. worth the pain)"} ]
+      },
+      {
+        id: 115, category: "Opinions & Feelings",
+        pt: "Eu concordo.",
+        en: "I agree.",
+        breakdown: [ {pt:"Eu", en:"I"}, {pt:"concordo", en:"agree"} ],
+        note: "Discordo = I disagree."
+      },
+      {
+        id: 116, category: "Opinions & Feelings",
+        pt: "Depende.",
+        en: "It depends.",
+        breakdown: [ {pt:"Depende", en:"(it) depends"} ]
+      },
+      {
+        id: 117, category: "Opinions & Feelings",
+        pt: "Eu adoro música brasileira.",
+        en: "I love Brazilian music.",
+        breakdown: [ {pt:"Eu adoro", en:"I love"}, {pt:"música", en:"music"}, {pt:"brasileira", en:"Brazilian"} ]
+      },
+      {
+        id: 118, category: "Opinions & Feelings",
+        pt: "Eu não gosto muito de calor.",
+        en: "I don't really like the heat.",
+        breakdown: [ {pt:"Eu não", en:"I not"}, {pt:"gosto de", en:"like"}, {pt:"muito", en:"much"}, {pt:"calor", en:"heat"} ],
+        note: "Gostar always takes 'de': gosto de café, gosto de viajar."
+      },
+      {
+        id: 119, category: "Opinions & Feelings",
+        pt: "Prefiro ficar em casa hoje.",
+        en: "I'd rather stay home today.",
+        breakdown: [ {pt:"Prefiro", en:"prefer"}, {pt:"ficar", en:"stay"}, {pt:"em casa", en:"at home"}, {pt:"hoje", en:"today"} ]
+      },
+      {
+        id: 120, category: "Opinions & Feelings",
+        pt: "Estou muito feliz.",
+        en: "I'm really happy.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"muito", en:"very"}, {pt:"feliz", en:"happy"} ]
+      },
+      {
+        id: 121, category: "Opinions & Feelings",
+        pt: "Estou um pouco nervoso.",
+        en: "I'm a little nervous.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"um pouco", en:"a little"}, {pt:"nervoso", en:"nervous"} ],
+        note: "Women say: nervosa."
+      },
+      {
+        id: 122, category: "Opinions & Feelings",
+        pt: "Que pena!",
+        en: "What a shame! / Too bad!",
+        breakdown: [ {pt:"Que", en:"what (a)"}, {pt:"pena", en:"pity"} ]
+      },
+      {
+        id: 123, category: "Opinions & Feelings",
+        pt: "Não tem jeito.",
+        en: "There's nothing we can do.",
+        breakdown: [ {pt:"Não", en:"not"}, {pt:"tem", en:"there is"}, {pt:"jeito", en:"way"} ],
+        note: "Jeito is a key Brazilian word: \"dar um jeito\" = find a way to make it work."
+      },
+      {
+        id: 124, category: "Opinions & Feelings",
+        pt: "Tanto faz.",
+        en: "I don't mind. / Either way.",
+        breakdown: [ {pt:"Tanto", en:"as much"}, {pt:"faz", en:"(it) makes"} ]
+      },
+
+      // Conversation & Getting to Know People
+      {
+        id: 125, category: "Conversation & Getting to Know People",
+        pt: "Você tem irmãos?",
+        en: "Do you have any brothers or sisters?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"tem", en:"have"}, {pt:"irmãos", en:"siblings"} ]
+      },
+      {
+        id: 126, category: "Conversation & Getting to Know People",
+        pt: "Eu tenho um irmão mais velho.",
+        en: "I have an older brother.",
+        breakdown: [ {pt:"Eu tenho", en:"I have"}, {pt:"um", en:"a"}, {pt:"irmão", en:"brother"}, {pt:"mais velho", en:"older"} ],
+        note: "Swap: irmã (sister), mais novo/nova (younger). Sou filho único = I'm an only child."
+      },
+      {
+        id: 127, category: "Conversation & Getting to Know People",
+        pt: "O que você gosta de fazer no fim de semana?",
+        en: "What do you like to do on weekends?",
+        breakdown: [ {pt:"O que", en:"what"}, {pt:"você", en:"you"}, {pt:"gosta de", en:"like"}, {pt:"fazer", en:"do"}, {pt:"no fim de semana", en:"on the weekend"} ]
+      },
+      {
+        id: 128, category: "Conversation & Getting to Know People",
+        pt: "Você já foi a Taiwan?",
+        en: "Have you ever been to Taiwan?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"já", en:"ever/already"}, {pt:"foi", en:"went to"}, {pt:"Taiwan", en:"Taiwan"} ],
+        note: "Pattern: Você já...? = Have you ever...?"
+      },
+      {
+        id: 129, category: "Conversation & Getting to Know People",
+        pt: "Você deveria visitar Taiwan!",
+        en: "You should visit Taiwan!",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"deveria", en:"should"}, {pt:"visitar", en:"visit"}, {pt:"Taiwan", en:"Taiwan"} ]
+      },
+      {
+        id: 130, category: "Conversation & Getting to Know People",
+        pt: "A comida lá é maravilhosa.",
+        en: "The food there is amazing.",
+        breakdown: [ {pt:"A comida", en:"the food"}, {pt:"lá", en:"there"}, {pt:"é", en:"is"}, {pt:"maravilhosa", en:"wonderful"} ]
+      },
+      {
+        id: 131, category: "Conversation & Getting to Know People",
+        pt: "Como foi o seu fim de semana?",
+        en: "How was your weekend?",
+        breakdown: [ {pt:"Como", en:"how"}, {pt:"foi", en:"was"}, {pt:"o seu", en:"your"}, {pt:"fim de semana", en:"weekend"} ]
+      },
+      {
+        id: 132, category: "Conversation & Getting to Know People",
+        pt: "Foi ótimo!",
+        en: "It was great!",
+        breakdown: [ {pt:"Foi", en:"(it) was"}, {pt:"ótimo", en:"great"} ]
+      },
+      {
+        id: 133, category: "Conversation & Getting to Know People",
+        pt: "O que você fez ontem?",
+        en: "What did you do yesterday?",
+        breakdown: [ {pt:"O que", en:"what"}, {pt:"você", en:"you"}, {pt:"fez", en:"did"}, {pt:"ontem", en:"yesterday"} ]
+      },
+      {
+        id: 134, category: "Conversation & Getting to Know People",
+        pt: "Eu fui à praia.",
+        en: "I went to the beach.",
+        breakdown: [ {pt:"Eu fui", en:"I went"}, {pt:"à", en:"to the"}, {pt:"praia", en:"beach"} ],
+        note: "Fui = I went and also I was: context tells you which."
+      },
+      {
+        id: 135, category: "Conversation & Getting to Know People",
+        pt: "Faz tempo que você mora aqui?",
+        en: "Have you lived here long?",
+        breakdown: [ {pt:"Faz tempo", en:"it's been a while"}, {pt:"que", en:"that"}, {pt:"você", en:"you"}, {pt:"mora", en:"live"}, {pt:"aqui", en:"here"} ]
+      },
+      {
+        id: 136, category: "Conversation & Getting to Know People",
+        pt: "Posso te fazer uma pergunta?",
+        en: "Can I ask you a question?",
+        breakdown: [ {pt:"Posso", en:"can I"}, {pt:"te", en:"you"}, {pt:"fazer", en:"make/ask"}, {pt:"uma pergunta", en:"a question"} ]
+      },
+      {
+        id: 137, category: "Conversation & Getting to Know People",
+        pt: "Com certeza!",
+        en: "Definitely! / Of course!",
+        breakdown: [ {pt:"Com", en:"with"}, {pt:"certeza", en:"certainty"} ]
+      },
+      {
+        id: 138, category: "Conversation & Getting to Know People",
+        pt: "Foi um prazer conversar com você.",
+        en: "It was a pleasure talking with you.",
+        breakdown: [ {pt:"Foi", en:"(it) was"}, {pt:"um prazer", en:"a pleasure"}, {pt:"conversar", en:"talk"}, {pt:"com você", en:"with you"} ]
+      },
+
+      // Work & Online Life
+      {
+        id: 139, category: "Work & Online Life",
+        pt: "Eu trabalho por conta própria.",
+        en: "I'm self-employed.",
+        breakdown: [ {pt:"Eu trabalho", en:"I work"}, {pt:"por conta própria", en:"on my own account"} ]
+      },
+      {
+        id: 140, category: "Work & Online Life",
+        pt: "Eu tenho um podcast.",
+        en: "I have a podcast.",
+        breakdown: [ {pt:"Eu tenho", en:"I have"}, {pt:"um", en:"a"}, {pt:"podcast", en:"podcast"} ]
+      },
+      {
+        id: 141, category: "Work & Online Life",
+        pt: "Meu podcast é sobre esporte e cultura.",
+        en: "My podcast is about sports and culture.",
+        breakdown: [ {pt:"Meu", en:"my"}, {pt:"podcast", en:"podcast"}, {pt:"é", en:"is"}, {pt:"sobre", en:"about"}, {pt:"esporte", en:"sport"}, {pt:"e", en:"and"}, {pt:"cultura", en:"culture"} ]
+      },
+      {
+        id: 142, category: "Work & Online Life",
+        pt: "Você gostaria de participar do meu podcast?",
+        en: "Would you like to be on my podcast?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"gostaria de", en:"would like to"}, {pt:"participar do", en:"take part in"}, {pt:"meu", en:"my"}, {pt:"podcast", en:"podcast"} ]
+      },
+      {
+        id: 143, category: "Work & Online Life",
+        pt: "Podemos gravar online.",
+        en: "We can record online.",
+        breakdown: [ {pt:"Podemos", en:"we can"}, {pt:"gravar", en:"record"}, {pt:"online", en:"online"} ]
+      },
+      {
+        id: 144, category: "Work & Online Life",
+        pt: "Qual é o seu Instagram?",
+        en: "What's your Instagram?",
+        breakdown: [ {pt:"Qual", en:"which"}, {pt:"é", en:"is"}, {pt:"o seu", en:"your"}, {pt:"Instagram", en:"Instagram"} ],
+        note: "Often shortened to \"insta\"."
+      },
+      {
+        id: 145, category: "Work & Online Life",
+        pt: "Vou te mandar uma mensagem.",
+        en: "I'll send you a message.",
+        breakdown: [ {pt:"Vou", en:"will"}, {pt:"te", en:"you"}, {pt:"mandar", en:"send"}, {pt:"uma mensagem", en:"a message"} ]
+      },
+      {
+        id: 146, category: "Work & Online Life",
+        pt: "Me manda o link.",
+        en: "Send me the link.",
+        breakdown: [ {pt:"Me", en:"me"}, {pt:"manda", en:"send"}, {pt:"o link", en:"the link"} ],
+        note: "Starting with 'me' is informal but how everyone talks."
+      },
+      {
+        id: 147, category: "Work & Online Life",
+        pt: "Tenho uma reunião às três.",
+        en: "I have a meeting at three.",
+        breakdown: [ {pt:"Tenho", en:"have"}, {pt:"uma reunião", en:"a meeting"}, {pt:"às", en:"at"}, {pt:"três", en:"three"} ]
+      },
+      {
+        id: 148, category: "Work & Online Life",
+        pt: "Estou trabalhando nisso.",
+        en: "I'm working on it.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"trabalhando", en:"working"}, {pt:"nisso", en:"on that"} ]
+      },
+      {
+        id: 149, category: "Work & Online Life",
+        pt: "Deu certo!",
+        en: "It worked!",
+        breakdown: [ {pt:"Deu", en:"(it) gave"}, {pt:"certo", en:"right"} ],
+        note: "Opposite: \"Deu errado\" = it went wrong."
+      },
+      {
+        id: 150, category: "Work & Online Life",
+        pt: "Vamos marcar um horário?",
+        en: "Shall we set a time?",
+        breakdown: [ {pt:"Vamos", en:"let's"}, {pt:"marcar", en:"schedule"}, {pt:"um horário", en:"a time slot"} ],
+        note: "\"Vamos marcar!\" on its own is often a polite \"let's do it sometime\" that never happens."
+      },
+
+      // Hobbies & Going Out
+      {
+        id: 151, category: "Hobbies & Going Out",
+        pt: "Eu vou à academia três vezes por semana.",
+        en: "I go to the gym three times a week.",
+        breakdown: [ {pt:"Eu vou", en:"I go"}, {pt:"à", en:"to the"}, {pt:"academia", en:"gym"}, {pt:"três vezes", en:"three times"}, {pt:"por semana", en:"per week"} ],
+        note: "In Brazil, academia means gym."
+      },
+      {
+        id: 152, category: "Hobbies & Going Out",
+        pt: "Você pratica algum esporte?",
+        en: "Do you play any sports?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"pratica", en:"practice"}, {pt:"algum", en:"any"}, {pt:"esporte", en:"sport"} ]
+      },
+      {
+        id: 153, category: "Hobbies & Going Out",
+        pt: "Você torce para qual time?",
+        en: "Which team do you support?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"torce para", en:"root for"}, {pt:"qual", en:"which"}, {pt:"time", en:"team"} ],
+        note: "The essential football question in Brazil."
+      },
+      {
+        id: 154, category: "Hobbies & Going Out",
+        pt: "Em Taiwan, o esporte mais popular é o beisebol.",
+        en: "In Taiwan, the most popular sport is baseball.",
+        breakdown: [ {pt:"Em Taiwan", en:"in Taiwan"}, {pt:"o esporte", en:"the sport"}, {pt:"mais popular", en:"most popular"}, {pt:"é o", en:"is the"}, {pt:"beisebol", en:"baseball"} ]
+      },
+      {
+        id: 155, category: "Hobbies & Going Out",
+        pt: "Vamos assistir ao jogo?",
+        en: "Shall we watch the game?",
+        breakdown: [ {pt:"Vamos", en:"let's"}, {pt:"assistir ao", en:"watch (the)"}, {pt:"jogo", en:"game"} ],
+        note: "In spoken Brazilian Portuguese: \"assistir o jogo\"."
+      },
+      {
+        id: 156, category: "Hobbies & Going Out",
+        pt: "Quem ganhou?",
+        en: "Who won?",
+        breakdown: [ {pt:"Quem", en:"who"}, {pt:"ganhou", en:"won"} ]
+      },
+      {
+        id: 157, category: "Hobbies & Going Out",
+        pt: "Eu adoro viajar.",
+        en: "I love traveling.",
+        breakdown: [ {pt:"Eu adoro", en:"I love"}, {pt:"viajar", en:"travel"} ]
+      },
+      {
+        id: 158, category: "Hobbies & Going Out",
+        pt: "Vamos sair hoje à noite?",
+        en: "Shall we go out tonight?",
+        breakdown: [ {pt:"Vamos", en:"let's"}, {pt:"sair", en:"go out"}, {pt:"hoje à noite", en:"tonight"} ]
+      },
+      {
+        id: 159, category: "Hobbies & Going Out",
+        pt: "Tem algum bar legal aqui perto?",
+        en: "Is there a nice bar around here?",
+        breakdown: [ {pt:"Tem", en:"there is"}, {pt:"algum", en:"some"}, {pt:"bar", en:"bar"}, {pt:"legal", en:"cool"}, {pt:"aqui perto", en:"near here"} ]
+      },
+      {
+        id: 160, category: "Hobbies & Going Out",
+        pt: "Estou lendo um livro muito bom.",
+        en: "I'm reading a really good book.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"lendo", en:"reading"}, {pt:"um livro", en:"a book"}, {pt:"muito bom", en:"very good"} ]
+      },
+      {
+        id: 161, category: "Hobbies & Going Out",
+        pt: "Você já assistiu esse filme?",
+        en: "Have you seen this movie?",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"já", en:"ever/already"}, {pt:"assistiu", en:"watched"}, {pt:"esse", en:"this"}, {pt:"filme", en:"movie"} ]
+      },
+      {
+        id: 162, category: "Hobbies & Going Out",
+        pt: "Tem algum lugar bonito para visitar aqui?",
+        en: "Is there a beautiful place to visit around here?",
+        breakdown: [ {pt:"Tem", en:"there is"}, {pt:"algum", en:"some"}, {pt:"lugar", en:"place"}, {pt:"bonito", en:"beautiful"}, {pt:"para", en:"to"}, {pt:"visitar", en:"visit"}, {pt:"aqui", en:"here"} ]
+      },
+
+      // Accommodation
+      {
+        id: 163, category: "Accommodation",
+        pt: "Eu tenho uma reserva.",
+        en: "I have a reservation.",
+        breakdown: [ {pt:"Eu tenho", en:"I have"}, {pt:"uma reserva", en:"a reservation"} ]
+      },
+      {
+        id: 164, category: "Accommodation",
+        pt: "A reserva está no nome de Alex.",
+        en: "The reservation is under Alex.",
+        breakdown: [ {pt:"A reserva", en:"the reservation"}, {pt:"está no nome de", en:"is in the name of"}, {pt:"Alex", en:"Alex"} ]
+      },
+      {
+        id: 165, category: "Accommodation",
+        pt: "Que horas é o check-out?",
+        en: "What time is check-out?",
+        breakdown: [ {pt:"Que horas", en:"what time"}, {pt:"é o", en:"is the"}, {pt:"check-out", en:"check-out"} ]
+      },
+      {
+        id: 166, category: "Accommodation",
+        pt: "O café da manhã está incluído?",
+        en: "Is breakfast included?",
+        breakdown: [ {pt:"O café da manhã", en:"breakfast (lit. coffee of morning)"}, {pt:"está", en:"is"}, {pt:"incluído", en:"included"} ]
+      },
+      {
+        id: 167, category: "Accommodation",
+        pt: "Qual é a senha do Wi-Fi?",
+        en: "What's the Wi-Fi password?",
+        breakdown: [ {pt:"Qual", en:"which"}, {pt:"é", en:"is"}, {pt:"a senha", en:"the password"}, {pt:"do Wi-Fi", en:"of the Wi-Fi"} ]
+      },
+      {
+        id: 168, category: "Accommodation",
+        pt: "O ar-condicionado não está funcionando.",
+        en: "The air conditioning isn't working.",
+        breakdown: [ {pt:"O ar-condicionado", en:"the air conditioning"}, {pt:"não está funcionando", en:"is not working"} ],
+        note: "Pattern: não está funcionando = isn't working."
+      },
+      {
+        id: 169, category: "Accommodation",
+        pt: "Pode me dar mais uma toalha?",
+        en: "Could I have another towel?",
+        breakdown: [ {pt:"Pode", en:"can (you)"}, {pt:"me dar", en:"give me"}, {pt:"mais uma", en:"one more"}, {pt:"toalha", en:"towel"} ]
+      },
+      {
+        id: 170, category: "Accommodation",
+        pt: "Posso deixar minha mala aqui?",
+        en: "Can I leave my suitcase here?",
+        breakdown: [ {pt:"Posso", en:"can I"}, {pt:"deixar", en:"leave"}, {pt:"minha", en:"my"}, {pt:"mala", en:"suitcase"}, {pt:"aqui", en:"here"} ]
+      },
+      {
+        id: 171, category: "Accommodation",
+        pt: "A água do chuveiro está fria.",
+        en: "The shower water is cold.",
+        breakdown: [ {pt:"A água", en:"the water"}, {pt:"do chuveiro", en:"of the shower"}, {pt:"está", en:"is"}, {pt:"fria", en:"cold"} ],
+        note: "Many Brazilian showers are electric: set the switch to 'inverno' (winter) for hotter water."
+      },
+      {
+        id: 172, category: "Accommodation",
+        pt: "Onde posso lavar roupa?",
+        en: "Where can I do laundry?",
+        breakdown: [ {pt:"Onde", en:"where"}, {pt:"posso", en:"can I"}, {pt:"lavar", en:"wash"}, {pt:"roupa", en:"clothes"} ]
+      },
+
+      // Phone, Money & Services
+      {
+        id: 173, category: "Phone, Money & Services",
+        pt: "Meu celular está sem bateria.",
+        en: "My phone is out of battery.",
+        breakdown: [ {pt:"Meu celular", en:"my cellphone"}, {pt:"está", en:"is"}, {pt:"sem", en:"without"}, {pt:"bateria", en:"battery"} ]
+      },
+      {
+        id: 174, category: "Phone, Money & Services",
+        pt: "Posso carregar meu celular aqui?",
+        en: "Can I charge my phone here?",
+        breakdown: [ {pt:"Posso", en:"can I"}, {pt:"carregar", en:"charge"}, {pt:"meu celular", en:"my cellphone"}, {pt:"aqui", en:"here"} ]
+      },
+      {
+        id: 175, category: "Phone, Money & Services",
+        pt: "Onde tem um caixa eletrônico?",
+        en: "Where is there an ATM?",
+        breakdown: [ {pt:"Onde", en:"where"}, {pt:"tem", en:"there is"}, {pt:"um caixa eletrônico", en:"an ATM (lit. electronic cashier)"} ]
+      },
+      {
+        id: 176, category: "Phone, Money & Services",
+        pt: "Meu cartão não passou.",
+        en: "My card didn't go through.",
+        breakdown: [ {pt:"Meu cartão", en:"my card"}, {pt:"não passou", en:"didn't pass"} ]
+      },
+      {
+        id: 177, category: "Phone, Money & Services",
+        pt: "Posso pagar em dinheiro?",
+        en: "Can I pay in cash?",
+        breakdown: [ {pt:"Posso", en:"can I"}, {pt:"pagar", en:"pay"}, {pt:"em dinheiro", en:"in cash/money"} ]
+      },
+      {
+        id: 178, category: "Phone, Money & Services",
+        pt: "Pode dividir a conta?",
+        en: "Can you split the bill?",
+        breakdown: [ {pt:"Pode", en:"can (you)"}, {pt:"dividir", en:"split"}, {pt:"a conta", en:"the bill"} ],
+        note: "Casual version: \"rachar a conta\"."
+      },
+      {
+        id: 179, category: "Phone, Money & Services",
+        pt: "Pode me dar um recibo?",
+        en: "Can you give me a receipt?",
+        breakdown: [ {pt:"Pode", en:"can (you)"}, {pt:"me dar", en:"give me"}, {pt:"um recibo", en:"a receipt"} ]
+      },
+      {
+        id: 180, category: "Phone, Money & Services",
+        pt: "Qual é a sua chave Pix?",
+        en: "What's your Pix key?",
+        breakdown: [ {pt:"Qual", en:"which"}, {pt:"é", en:"is"}, {pt:"a sua", en:"your"}, {pt:"chave Pix", en:"Pix key"} ],
+        note: "A Pix key is usually a phone number, email or CPF."
+      },
+
+      // Health
+      {
+        id: 181, category: "Health",
+        pt: "Estou com dor de cabeça.",
+        en: "I have a headache.",
+        breakdown: [ {pt:"Estou com", en:"am with"}, {pt:"dor de cabeça", en:"pain of head"} ],
+        note: "Pattern: Estou com dor de... garganta (throat), barriga (stomach), dente (tooth)."
+      },
+      {
+        id: 182, category: "Health",
+        pt: "Preciso ir ao médico.",
+        en: "I need to see a doctor.",
+        breakdown: [ {pt:"Preciso", en:"need"}, {pt:"ir ao médico", en:"go to the doctor"} ]
+      },
+      {
+        id: 183, category: "Health",
+        pt: "Tem algum remédio para gripe?",
+        en: "Do you have any medicine for the flu?",
+        breakdown: [ {pt:"Tem", en:"there is"}, {pt:"algum remédio", en:"some medicine"}, {pt:"para gripe", en:"for flu/cold"} ]
+      },
+      {
+        id: 184, category: "Health",
+        pt: "Onde fica o hospital mais próximo?",
+        en: "Where's the nearest hospital?",
+        breakdown: [ {pt:"Onde fica", en:"where is (located)"}, {pt:"o hospital", en:"the hospital"}, {pt:"mais próximo", en:"nearest"} ]
+      },
+      {
+        id: 185, category: "Health",
+        pt: "Sou alérgico a camarão.",
+        en: "I'm allergic to shrimp.",
+        breakdown: [ {pt:"Sou", en:"am"}, {pt:"alérgico a", en:"allergic to"}, {pt:"camarão", en:"shrimp"} ],
+        note: "Women say: alérgica. Swap in your own allergy."
+      },
+      {
+        id: 186, category: "Health",
+        pt: "Eu me machuquei.",
+        en: "I hurt myself.",
+        breakdown: [ {pt:"Eu me", en:"I myself"}, {pt:"machuquei", en:"hurt"} ]
+      },
+      {
+        id: 187, category: "Health",
+        pt: "Preciso de protetor solar.",
+        en: "I need sunscreen.",
+        breakdown: [ {pt:"Preciso de", en:"need"}, {pt:"protetor solar", en:"sunscreen"} ],
+        note: "Precisar + noun takes 'de'; precisar + verb doesn't (preciso ir)."
+      },
+      {
+        id: 188, category: "Health",
+        pt: "Estou melhor, obrigado.",
+        en: "I'm feeling better, thanks.",
+        breakdown: [ {pt:"Estou", en:"am"}, {pt:"melhor", en:"better"}, {pt:"obrigado", en:"thanks"} ]
+      },
+
+      // Everyday Conversation Phrases
+      {
+        id: 189, category: "Everyday Conversation Phrases",
+        pt: "Deixa eu pensar...",
+        en: "Let me think...",
+        breakdown: [ {pt:"Deixa", en:"let"}, {pt:"eu", en:"me"}, {pt:"pensar", en:"think"} ],
+        note: "Textbook form is \"deixe-me pensar\", but everyone says \"deixa eu\"."
+      },
+      {
+        id: 190, category: "Everyday Conversation Phrases",
+        pt: "Como assim?",
+        en: "What do you mean?",
+        breakdown: [ {pt:"Como", en:"how"}, {pt:"assim", en:"like that"} ]
+      },
+      {
+        id: 191, category: "Everyday Conversation Phrases",
+        pt: "Na verdade, eu não sei.",
+        en: "Actually, I don't know.",
+        breakdown: [ {pt:"Na verdade", en:"actually (lit. in truth)"}, {pt:"eu não sei", en:"I don't know"} ]
+      },
+      {
+        id: 192, category: "Everyday Conversation Phrases",
+        pt: "Não faço ideia.",
+        en: "I have no idea.",
+        breakdown: [ {pt:"Não faço", en:"not make"}, {pt:"ideia", en:"idea"} ]
+      },
+      {
+        id: 193, category: "Everyday Conversation Phrases",
+        pt: "Tipo assim...",
+        en: "Like... / Kind of...",
+        breakdown: [ {pt:"Tipo", en:"like (lit. type)"}, {pt:"assim", en:"this way"} ],
+        note: "Brazil's version of the English filler word 'like'."
+      },
+      {
+        id: 194, category: "Everyday Conversation Phrases",
+        pt: "Espera aí!",
+        en: "Hold on! / Wait a sec!",
+        breakdown: [ {pt:"Espera", en:"wait"}, {pt:"aí", en:"there"} ]
+      },
+      {
+        id: 195, category: "Everyday Conversation Phrases",
+        pt: "Nossa!",
+        en: "Wow!",
+        breakdown: [ {pt:"Nossa", en:"Our Lady"} ],
+        note: "The most common Brazilian exclamation of surprise."
+      },
+      {
+        id: 196, category: "Everyday Conversation Phrases",
+        pt: "Pode ser.",
+        en: "Maybe. / Sure, that works.",
+        breakdown: [ {pt:"Pode", en:"it can"}, {pt:"ser", en:"be"} ],
+        note: "Also a casual 'yes' when someone offers you something."
+      },
+      {
+        id: 197, category: "Everyday Conversation Phrases",
+        pt: "Você tem razão.",
+        en: "You're right.",
+        breakdown: [ {pt:"Você", en:"you"}, {pt:"tem", en:"have"}, {pt:"razão", en:"reason"} ]
+      },
+      {
+        id: 198, category: "Everyday Conversation Phrases",
+        pt: "Não se preocupe.",
+        en: "Don't worry.",
+        breakdown: [ {pt:"Não se preocupe", en:"don't worry yourself"} ],
+        note: "Casual: \"Relaxa!\""
+      },
+      {
+        id: 199, category: "Everyday Conversation Phrases",
+        pt: "Boa sorte!",
+        en: "Good luck!",
+        breakdown: [ {pt:"Boa", en:"good"}, {pt:"sorte", en:"luck"} ]
+      },
+      {
+        id: 200, category: "Everyday Conversation Phrases",
+        pt: "Valeu!",
+        en: "Thanks! / Cheers!",
+        breakdown: [ {pt:"Valeu", en:"it was worth it"} ],
+        note: "Very common casual 'thanks' between friends."
+      }
+    ];
+
+    // --- 2. GLOBAL STATE ---
+    let currentCategory = "ALL";
+    let searchQuery = "";
+    let favorites = new Set(JSON.parse(localStorage.getItem("pt_favs") || "[]"));
+    let showFavsOnly = false;
+
+    let currentSentenceIndex = -1; // Pointer in current visible list
+    let activeFilteredList = [];
+    
+    let isPlaying = false;
+    let autoNext = false;
+    let loopSingle = false;
+
+    // Speech Synthesis
+    const synth = window.speechSynthesis;
+    let voices = [];
+    let ptVoice = null;
+    let enVoice = null;
+
+    // --- 3. INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      initVoices();
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = initVoices;
+      }
+
+      renderCategories();
+      updateFilteredSentences();
+      updateFavBadgeCount();
+    });
+
+    function initVoices() {
+      voices = synth.getVoices();
+      
+      // Find PT-BR voice
+      ptVoice = voices.find(v => v.lang === 'pt-BR' || v.lang.startsWith('pt_BR')) ||
+                voices.find(v => v.lang.startsWith('pt')) || null;
+
+      // Find EN voice
+      enVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB') ||
+                voices.find(v => v.lang.startsWith('en')) || null;
+
+      const badge = document.getElementById("voiceStatusBadge");
+      if (ptVoice) {
+        badge.className = "bg-emerald-900/60 text-emerald-200 border border-emerald-400/30 px-3 py-1.5 rounded-full flex items-center gap-1.5";
+        badge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Speech Ready (${ptVoice.name.split(' ')[0]})`;
+      } else {
+        badge.className = "bg-amber-900/60 text-amber-200 border border-amber-400/30 px-3 py-1.5 rounded-full flex items-center gap-1.5";
+        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-300"></i> Standard TTS Mode`;
+      }
+    }
+
+    // --- 4. RENDER CATEGORIES TABS ---
+    function renderCategories() {
+      const categories = [
+        "ALL",
+        "Daily Routine & Home",
+        "Opinions & Feelings",
+        "Conversation & Getting to Know People",
+        "Work & Online Life",
+        "Hobbies & Going Out",
+        "Accommodation",
+        "Phone, Money & Services",
+        "Health",
+        "Everyday Conversation Phrases"
+      ];
+
+      const container = document.getElementById("categoryTabs");
+      container.innerHTML = categories.map(cat => {
+        const isSelected = currentCategory === cat;
+        const activeClass = isSelected
+          ? "bg-brazil-green text-white shadow-md font-semibold"
+          : "bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium";
+        
+        const label = cat === "ALL" ? "All Sentences" : cat;
+        return `
+          <button onclick="selectCategory('${cat}')" 
+                  class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all ${activeClass}">
+            ${label}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      updateFilteredSentences();
+    }
+
+    // --- 5. FILTERING LOGIC ---
+    function updateFilteredSentences() {
+      activeFilteredList = SENTENCES_DATA.filter(item => {
+        // Category Filter
+        if (currentCategory !== "ALL" && item.category !== currentCategory) return false;
+        
+        // Favorites Filter
+        if (showFavsOnly && !favorites.has(item.id)) return false;
+
+        // Search Query
+        if (searchQuery.trim() !== "") {
+          const q = searchQuery.toLowerCase();
+          const matchPt = item.pt.toLowerCase().includes(q);
+          const matchEn = item.en.toLowerCase().includes(q);
+          const matchBreakdown = item.breakdown.some(b => b.pt.toLowerCase().includes(q) || b.en.toLowerCase().includes(q));
+          const matchId = item.id.toString().includes(q);
+          if (!matchPt && !matchEn && !matchBreakdown && !matchId) return false;
+        }
+
+        return true;
+      });
+
+      document.getElementById("visibleCount").textContent = activeFilteredList.length;
+      renderSentencesList();
+    }
+
+    // --- 6. RENDER CARDS ---
+    function renderSentencesList() {
+      const container = document.getElementById("sentencesList");
+
+      if (activeFilteredList.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6">
+            <i class="fa-solid fa-face-meh text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-600 font-medium">No Portuguese sentences match your current search/filter.</p>
+            <button onclick="resetFilters()" class="mt-3 text-xs bg-emerald-100 text-emerald-800 font-semibold px-4 py-2 rounded-xl">Reset Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = activeFilteredList.map((item, index) => {
+        const isFav = favorites.has(item.id);
+        const isCurrentlyPlaying = (currentSentenceIndex >= 0 && activeFilteredList[currentSentenceIndex]?.id === item.id);
+
+        return `
+          <div id="card-${item.id}" class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 transition-all duration-200 ${isCurrentlyPlaying ? 'playing-card' : 'hover:border-slate-300 shadow-sm'}">
+            
+            <div class="flex items-start justify-between gap-3">
+              <!-- Number badge & Portuguese Text -->
+              <div class="flex items-start gap-3 min-w-0">
+                <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  ${item.id}
+                </span>
+                <div class="min-w-0">
+                  <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                    ${highlightSearch(item.pt, searchQuery)}
+                  </h3>
+                  <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+                    ${highlightSearch(item.en, searchQuery)}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Star / Favorite -->
+              <button onclick="toggleFav(${item.id})" class="text-lg p-1.5 text-slate-300 hover:text-brazil-amber transition shrink-0">
+                <i class="${isFav ? 'fa-solid text-amber-400' : 'fa-regular'} fa-star"></i>
+              </button>
+            </div>
+
+            <!-- Notes if present -->
+            ${item.note ? `
+              <div class="mt-3 text-xs bg-amber-50 text-amber-800 border border-amber-200/70 px-3 py-2 rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-500 shrink-0"></i>
+                <span>${item.note}</span>
+              </div>
+            ` : ''}
+
+            <!-- Collapsible Word Breakdown -->
+            <details class="mt-3 group">
+              <summary class="text-xs font-semibold text-slate-400 hover:text-brazil-green cursor-pointer list-none flex items-center gap-1">
+                <i class="fa-solid fa-chevron-right text-[10px] group-open:rotate-90 transition-transform"></i>
+                <span>Word-by-word Breakdown</span>
+              </summary>
+              <div class="mt-2.5 flex flex-wrap gap-1.5 pt-1">
+                ${item.breakdown.map(b => `
+                  <span class="inline-flex flex-col bg-slate-100 border border-slate-200/80 px-2.5 py-1 rounded-lg text-xs">
+                    <span class="font-bold text-slate-800">${b.pt}</span>
+                    <span class="text-[10px] text-amber-700 font-medium">${b.en}</span>
+                  </span>
+                `).join('')}
+              </div>
+            </details>
+
+            <!-- Card Control Buttons -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${item.category}</span>
+              
+              <div class="flex items-center gap-1.5">
+                <button onclick="playSingleText('${escapeJsString(item.pt)}', 'pt')" 
+                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Listen PT">
+                  <i class="fa-solid fa-volume-high text-emerald-600"></i> PT
+                </button>
+                <button onclick="playSingleText('${escapeJsString(item.en)}', 'en')" 
+                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Listen EN">
+                  <i class="fa-solid fa-volume-high text-blue-600"></i> EN
+                </button>
+                <button onclick="playSentenceByIndex(${index})" 
+                        class="px-3 py-1.5 bg-brazil-green hover:bg-brazil-darkgreen text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-sm transition">
+                  <i class="fa-solid fa-play text-[10px]"></i> Play Sequence
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Helper to escape single quotes in strings for JS inline calls
+    function escapeJsString(str) {
+      return str.replace(/'/g, "\\'");
+    }
+
+    function highlightSearch(text, query) {
+      if (!query) return text;
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, `<mark class="bg-yellow-200 text-slate-900 rounded-sm px-0.5">$1</mark>`);
+    }
+
+    // --- 7. AUDIO SPEECH LOGIC ---
+    function playSentenceByIndex(index) {
+      if (index < 0 || index >= activeFilteredList.length) return;
+      
+      currentSentenceIndex = index;
+      const item = activeFilteredList[currentSentenceIndex];
+
+      // Update Bottom Player UI
+      document.getElementById("playerNumBadge").textContent = item.id;
+      document.getElementById("playerPT").textContent = item.pt;
+      document.getElementById("playerEN").textContent = item.en;
+      
+      renderSentencesList(); // re-render to update highlighted card
+
+      // Scroll highlighted card gently into view if needed
+      const cardEl = document.getElementById(`card-${item.id}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      executeSentenceAudioSequence(item);
+    }
+
+    function executeSentenceAudioSequence(item) {
+      stopSpeech(); // cancel ongoing speech
+
+      const mode = document.getElementById("playModeSelect").value;
+      const speed = parseFloat(document.getElementById("speedRateSelect").value);
+
+      isPlaying = true;
+      updatePlayStateUI(true);
+
+      const utterances = [];
+
+      if (mode === "PT_ONLY") {
+        utterances.push(createUtterance(item.pt, 'pt', speed));
+      } else if (mode === "PT_EN") {
+        utterances.push(createUtterance(item.pt, 'pt', speed));
+        utterances.push(createUtterance(item.en, 'en', speed, 300)); // slight pause
+      } else if (mode === "EN_PT") {
+        utterances.push(createUtterance(item.en, 'en', speed));
+        utterances.push(createUtterance(item.pt, 'pt', speed, 300));
+      } else if (mode === "EN_ONLY") {
+        utterances.push(createUtterance(item.en, 'en', speed));
+      }
+
+      // Chain speech utterances
+      utterances.forEach((utt, i) => {
+        if (i === utterances.length - 1) {
+          utt.onend = () => {
+            if (loopSingle) {
+              setTimeout(() => playSentenceByIndex(currentSentenceIndex), 400);
+            } else if (autoNext) {
+              setTimeout(() => playNextSentence(), 600);
+            } else {
+              isPlaying = false;
+              updatePlayStateUI(false);
+            }
+          };
+        }
+        synth.speak(utt);
+      });
+    }
+
+    function createUtterance(text, lang, rate, delayMs = 0) {
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = rate;
+
+      if (lang === 'pt') {
+        utt.lang = 'pt-BR';
+        if (ptVoice) utt.voice = ptVoice;
+      } else {
+        utt.lang = 'en-US';
+        if (enVoice) utt.voice = enVoice;
+      }
+
+      return utt;
+    }
+
+    function playSingleText(text, lang) {
+      stopSpeech();
+      const speed = parseFloat(document.getElementById("speedRateSelect").value);
+      const utt = createUtterance(text, lang, speed);
+      
+      isPlaying = true;
+      updatePlayStateUI(true);
+      
+      utt.onend = () => {
+        isPlaying = false;
+        updatePlayStateUI(false);
+      };
+      
+      synth.speak(utt);
+    }
+
+    function stopSpeech() {
+      if (synth.speaking || synth.pending) {
+        synth.cancel();
+      }
+      isPlaying = false;
+      updatePlayStateUI(false);
+    }
+
+    function toggleMainPlay() {
+      if (isPlaying) {
+        stopSpeech();
+      } else {
+        if (currentSentenceIndex >= 0 && currentSentenceIndex < activeFilteredList.length) {
+          playSentenceByIndex(currentSentenceIndex);
+        } else if (activeFilteredList.length > 0) {
+          playSentenceByIndex(0);
+        }
+      }
+    }
+
+    function playNextSentence() {
+      if (activeFilteredList.length === 0) return;
+      let nextIndex = currentSentenceIndex + 1;
+      if (nextIndex >= activeFilteredList.length) nextIndex = 0; // loop back to start
+      playSentenceByIndex(nextIndex);
+    }
+
+    function playPrevSentence() {
+      if (activeFilteredList.length === 0) return;
+      let prevIndex = currentSentenceIndex - 1;
+      if (prevIndex < 0) prevIndex = activeFilteredList.length - 1;
+      playSentenceByIndex(prevIndex);
+    }
+
+    function playAllFiltered() {
+      if (activeFilteredList.length > 0) {
+        autoNext = true;
+        updateAutoNextUI();
+        playSentenceByIndex(0);
+      }
+    }
+
+    function updatePlayStateUI(playing) {
+      const btn = document.getElementById("mainPlayBtn");
+      const label = document.getElementById("speechStateLabel");
+      
+      if (playing) {
+        btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+        btn.className = "w-12 h-12 bg-amber-500 hover:bg-amber-600 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-amber-600/30 transition transform active:scale-95";
+        label.textContent = "Speaking...";
+        label.className = "hidden sm:inline-block font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md border border-emerald-300 animate-pulse";
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-play ml-0.5"></i>`;
+        btn.className = "w-12 h-12 bg-brazil-green hover:bg-brazil-darkgreen text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-emerald-600/30 transition transform active:scale-95";
+        label.textContent = "Ready";
+        label.className = "hidden sm:inline-block font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md border border-slate-200";
+      }
+    }
+
+    // --- 8. UI TOGGLES & SEARCH ---
+    function toggleAutoNext() {
+      autoNext = !autoNext;
+      if (autoNext) loopSingle = false; // mutually exclusive
+      updateAutoNextUI();
+      updateLoopSingleUI();
+    }
+
+    function updateAutoNextUI() {
+      const btn = document.getElementById("autoNextBtn");
+      if (autoNext) {
+        btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-emerald-300 bg-emerald-100 text-emerald-800 flex items-center gap-1.5 transition";
+      } else {
+        btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-600 flex items-center gap-1.5 transition";
+      }
+    }
+
+    function toggleLoopSingle() {
+      loopSingle = !loopSingle;
+      if (loopSingle) autoNext = false;
+      updateLoopSingleUI();
+      updateAutoNextUI();
+    }
+
+    function updateLoopSingleUI() {
+      const btn = document.getElementById("loopSingleBtn");
+      if (loopSingle) {
+        btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-emerald-300 bg-emerald-100 text-emerald-800 flex items-center gap-1.5 transition";
+      } else {
+        btn.className = "px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-600 flex items-center gap-1.5 transition";
+      }
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById("searchInput").value;
+      const clearBtn = document.getElementById("clearSearchBtn");
+      if (searchQuery.length > 0) {
+        clearBtn.classList.remove("hidden");
+      } else {
+        clearBtn.classList.add("hidden");
+      }
+      updateFilteredSentences();
+    }
+
+    function clearSearch() {
+      document.getElementById("searchInput").value = "";
+      handleSearch();
+    }
+
+    function toggleFavoritesFilter() {
+      showFavsOnly = !showFavsOnly;
+      const btn = document.getElementById("favOnlyToggle");
+      if (showFavsOnly) {
+        btn.className = "bg-brazil-yellow text-slate-900 border border-yellow-300 px-3 py-1.5 rounded-full transition flex items-center gap-1.5 font-bold";
+      } else {
+        btn.className = "bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-full transition flex items-center gap-1.5";
+      }
+      updateFilteredSentences();
+    }
+
+    function toggleFav(id) {
+      if (favorites.has(id)) {
+        favorites.delete(id);
+      } else {
+        favorites.add(id);
+      }
+      localStorage.setItem("pt_favs", JSON.stringify(Array.from(favorites)));
+      updateFavBadgeCount();
+      renderSentencesList();
+    }
+
+    function updateFavBadgeCount() {
+      document.getElementById("favCount").textContent = favorites.size;
+    }
+
+    function resetFilters() {
+      currentCategory = "ALL";
+      searchQuery = "";
+      showFavsOnly = false;
+      document.getElementById("searchInput").value = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      renderCategories();
+      updateFilteredSentences();
+    }
+  </script>
+</body>
+</html>
